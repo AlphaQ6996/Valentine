@@ -60,18 +60,32 @@ export default function ValentinesSurprise() {
     setStage('gift');
   };
 
+  // const handleBackToEnvelopes = () => {
+  //   // Mark the selected gift envelope as opened and change stage
+  //   const currentGift = selectedGift;
+  //   setSelectedGift(null);
+  //   setStage('choice');
+  //   // Update opened envelopes after stage change to avoid race conditions
+  //   if (currentGift !== null) {
+  //     setOpenedEnvelopes(prev => new Set([...prev, currentGift]));
+  //   }
+  // };
+
   const handleBackToEnvelopes = () => {
-    // Mark the selected gift envelope as opened
-    if (selectedGift !== null) {
-      setOpenedEnvelopes(prev => new Set([...prev, selectedGift]));
-    }
-    setSelectedGift(null);
+    const giftToMark = selectedGift;
+  
     setStage('choice');
+  
+    if (giftToMark !== null) {
+      setOpenedEnvelopes(prev => new Set([...prev, giftToMark]));
+    }
+  
+    setSelectedGift(null);
   };
 
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#D8BFD8] font-serif">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {stage === 'proposal' && (
           <ProposalStage
             key="proposal"
@@ -257,7 +271,7 @@ function CelebrationStage() {
         className="relative z-10"
       >
         <img
-          src="/celebration.gif"
+          src={`${import.meta.env.BASE_URL}celebration.gif`}
           alt="Celebration"
           className="w-64 h-64 md:w-96 md:h-96 object-contain rounded-lg"
         />
@@ -273,7 +287,7 @@ function ChoiceStage({ handleEnvelopeClick, openedEnvelopes }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
       className="flex flex-col items-center justify-center min-h-screen p-4"
     >
       <motion.h2
@@ -282,7 +296,7 @@ function ChoiceStage({ handleEnvelopeClick, openedEnvelopes }) {
         className="text-3xl md:text-5xl font-bold text-[#6D28D9] mb-12 text-center"
         style={{ marginTop: '-20px' }}
       >
-        Pick your gift, Love! 💜
+        Pick your gift, Darling! 💜
       </motion.h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl">
@@ -498,13 +512,53 @@ function Envelope({ index, onClick, isOpened }) {
 }
 
 // Stage 4: Gift Views
+// function GiftStage({ selectedGift, handleBackToEnvelopes }) {
+//   return (
+//     <motion.div
+//       initial={{ opacity: 0 }}
+//       animate={{ opacity: 1 }}
+//       exit={{ opacity: 0 }}
+//       transition={{ duration: 0.15 }}
+//       className="min-h-screen p-4 flex flex-col items-center justify-center"
+//     >
+//       <motion.button
+//         whileHover={{ scale: 1.05 }}
+//         whileTap={{ scale: 0.95 }}
+//         onClick={handleBackToEnvelopes}
+//         className="absolute top-4 left-4 px-6 py-3 bg-[#6D28D9] text-white rounded-full font-semibold shadow-lg z-10"
+//       >
+//         ← Back
+//       </motion.button>
+
+//       {selectedGift === 0 && <BouquetGift />}
+//       {selectedGift === 1 && <ChocolateGift />}
+//       {selectedGift === 2 && <CouponsGift />}
+//     </motion.div>
+//   );
+// }
+
+
+// Stage 4: Gift Views
+// Stage 4: Gift Views
+// Stage 4: Gift Views
 function GiftStage({ selectedGift, handleBackToEnvelopes }) {
+  // Use a ref to store the last valid selectedGift value
+  const currentGiftRef = useRef(selectedGift);
+  
+  // Only update the ref when selectedGift is not null
+  if (selectedGift !== null) {
+    currentGiftRef.current = selectedGift;
+  }
+  
+  // Always use the ref value for rendering to maintain content during exit animation
+  const giftToRender = currentGiftRef.current;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.15 }}
       className="min-h-screen p-4 flex flex-col items-center justify-center"
     >
       <motion.button
@@ -516,17 +570,45 @@ function GiftStage({ selectedGift, handleBackToEnvelopes }) {
         ← Back
       </motion.button>
 
-      {selectedGift === 0 && <BouquetGift />}
-      {selectedGift === 1 && <ChocolateGift />}
-      {selectedGift === 2 && <CouponsGift />}
+      {selectedGift !== null && giftToRender === 0 && <BouquetGift />}
+      {selectedGift !== null && giftToRender === 1 && <ChocolateGift />}
+      {selectedGift !== null && giftToRender === 2 && <CouponsGift />}
     </motion.div>
   );
 }
 
+
 // Gift 1: Bouquet with Floating Hearts
 function BouquetGift() {
+  const [showMessages, setShowMessages] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowMessages(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const messages = [
+    {
+      text: "Flowers that will never wither, just like how I feel about you. 💜💜💜",
+      position: { left: 'calc(-20% - 50px)', top: '15%' },
+      rotation: -8
+    },
+    {
+      text: "Sending you these because I wish I could be there to hand-deliver a real bunch to your doorstep.",
+      position: { right: 'calc(-18% - 50px)', bottom: '20%' },
+      rotation: 5
+    },
+    {
+      text: "For the girl who makes my world bloom. 💜",
+      position: { left: 'calc(50% + 10px)', bottom: 'calc(-15% - 5px)', transform: 'translateX(-50%)' },
+      rotation: 0
+    }
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center w-full px-4">
       <motion.h3
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -535,39 +617,68 @@ function BouquetGift() {
         A Bouquet for You 💐
       </motion.h3>
 
-      <div className="relative">
-        <img
-          src="/bouquet.png"
-          alt="Bouquet"
-          className="w-64 h-64 md:w-96 md:h-96 object-contain"
-        />
+      <div className="relative w-full max-w-2xl flex justify-center">
+        <div className="relative">
+          <img
+            src={`${import.meta.env.BASE_URL}bouquet.png`}
+            alt="Bouquet"
+            className="w-64 h-64 md:w-96 md:h-96 object-contain relative z-10"
+          />
 
-        {/* Floating hearts */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ y: 100, opacity: 0 }}
-              animate={{
-                y: -200,
-                opacity: [0, 1, 1, 0],
-                x: Math.sin(i) * 50,
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: i * 0.3,
-                ease: "easeOut",
-              }}
-              className="absolute text-2xl"
-              style={{
-                left: `${20 + (i % 5) * 15}%`,
-                bottom: 0,
-              }}
-            >
-              💜
-            </motion.div>
-          ))}
+          {/* Floating hearts */}
+          <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 15 }}>
+            {[...Array(15)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ y: 100, opacity: 0 }}
+                animate={{
+                  y: -200,
+                  opacity: [0, 1, 1, 0],
+                  x: Math.sin(i) * 50,
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: i * 0.3,
+                  ease: "easeOut",
+                }}
+                className="absolute text-2xl"
+                style={{
+                  left: `${20 + (i % 5) * 15}%`,
+                  bottom: 0,
+                }}
+              >
+                💜
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Messages positioned around the image */}
+          <AnimatePresence>
+            {showMessages && (
+              <>
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.3, duration: 0.6 }}
+                    className="absolute bg-purple-500/20 backdrop-blur-md border border-purple-200 p-2 md:p-3 lg:p-4 rounded-xl z-20 max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-[250px]"
+                    style={{
+                      ...message.position,
+                      transform: message.position.transform 
+                        ? `${message.position.transform} rotate(${message.rotation}deg)` 
+                        : `rotate(${message.rotation}deg)`,
+                    }}
+                  >
+                    <p className="text-[#6D28D9] text-xs md:text-sm lg:text-base font-medium text-center">
+                      {message.text}
+                    </p>
+                  </motion.div>
+                ))}
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -576,8 +687,35 @@ function BouquetGift() {
 
 // Gift 2: Three.js Purple Glitter Heart
 function ChocolateGift() {
+  const [showMessages, setShowMessages] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowMessages(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const messages = [
+    {
+      text: "A little something sweet, for someone even sweeter.",
+      position: { left: '-22%', top: '25%' },
+      rotation: -6
+    },
+    {
+      text: "I couldn't mail you the actual box, so I coded you a heart instead. (Zero calories, 100% love😘).",
+      position: { right: '-20%', bottom: '25%' },
+      rotation: 7
+    },
+    {
+      text: "Bittersweet because we're apart, but mostly sweet because you're mine. 💕",
+      position: { left: '50%', bottom: '-18%', transform: 'translateX(-50%)' },
+      rotation: -3
+    }
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center w-full">
+    <div className="flex flex-col items-center justify-center w-full px-4">
       <motion.h3
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -586,28 +724,57 @@ function ChocolateGift() {
         Sweet Like Chocolate 🍫
       </motion.h3>
 
-      <div className="relative w-full max-w-2xl aspect-square">
-        {/* Chocolate image in center */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="absolute inset-0 flex items-center justify-center z-10"
-        >
-          <img
-            src="/Chocolate.png"
-            alt="Chocolate"
-            className="w-64 h-64 md:w-96 md:h-96 object-contain"
-          />
-        </motion.div>
+      <div className="relative w-full max-w-2xl flex justify-center">
+        <div className="relative w-full aspect-square">
+          {/* Glitter Heart background - particles explode first */}
+          <div className="w-full h-full absolute inset-0">
+            <Canvas camera={{ position: [0, 0, 50], fov: 60 }}>
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} />
+              <GlitterHeart />
+            </Canvas>
+          </div>
 
-        {/* Glitter Heart background */}
-        <div className="w-full h-full">
-          <Canvas camera={{ position: [0, 0, 30], fov: 50 }}>
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} />
-            <GlitterHeart />
-          </Canvas>
+          {/* Chocolate image in center - appears after explosion is visible */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.0, duration: 1.5 }}
+            className="absolute inset-0 flex items-center justify-center z-10"
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}Chocolate.png`}
+              alt="Chocolate"
+              className="w-64 h-64 md:w-96 md:h-96 object-contain"
+            />
+          </motion.div>
+
+          {/* Messages positioned around the image */}
+          <AnimatePresence>
+            {showMessages && (
+              <>
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.3, duration: 0.6 }}
+                    className="absolute bg-purple-500/20 backdrop-blur-md border border-purple-200 p-2 md:p-3 lg:p-4 rounded-xl z-20 max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-[250px]"
+                    style={{
+                      ...message.position,
+                      transform: message.position.transform 
+                        ? `${message.position.transform} rotate(${message.rotation}deg)` 
+                        : `rotate(${message.rotation}deg)`,
+                    }}
+                  >
+                    <p className="text-[#6D28D9] text-xs md:text-sm lg:text-base font-medium text-center">
+                      {message.text}
+                    </p>
+                  </motion.div>
+                ))}
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -615,257 +782,466 @@ function ChocolateGift() {
 }
 
 // Three.js Glitter Heart Component
+// function GlitterHeart() {
+//   const particlesRef = useRef();
+//   const PARTICLE_COUNT = 4000;
+//   const phaseRef = useRef(0);
+//   const velocitiesRef = useRef([]);
+//   const heartTargetsRef = useRef([]);
+  
+//   // Calculate responsive particle size based on screen width
+//   const getParticleSize = () => {
+//     const width = window.innerWidth;
+//     if (width < 640) {
+//       // Mobile
+//       return 0.15;
+//     } else if (width < 1024) {
+//       // Tablet
+//       return 0.2;
+//     } else {
+//       // Desktop
+//       return 0.25;
+//     }
+//   };
+  
+//   const [particleSize, setParticleSize] = useState(getParticleSize());
+  
+//   useEffect(() => {
+//     const handleResize = () => {
+//       setParticleSize(getParticleSize());
+//     };
+//     window.addEventListener('resize', handleResize);
+//     return () => window.removeEventListener('resize', handleResize);
+//   }, []);
+
+//   // ❤️ Heart parametric equation
+//   function heartShape(t) {
+//     const x = 16 * Math.pow(Math.sin(t), 3);
+//     const y =
+//       13 * Math.cos(t) -
+//       5 * Math.cos(2 * t) -
+//       2 * Math.cos(3 * t) -
+//       Math.cos(4 * t);
+//     return new THREE.Vector3(x * 4, y * 4, 0);
+//   }
+
+//   // Initialize particles
+//   const { positions, colors } = React.useMemo(() => {
+//     const positions = new Float32Array(PARTICLE_COUNT * 3);
+//     const colors = new Float32Array(PARTICLE_COUNT * 3);
+//     const velocities = [];
+//     const heartTargets = [];
+
+//     const purpleShades = [
+//       new THREE.Color("#9370DB"), // Medium Purple
+//       new THREE.Color("#8A2BE2"), // Blue Violet
+//       new THREE.Color("#DDA0DD"), // Plum
+//       new THREE.Color("#DA70D6"),  // Orchid
+//     ];
+
+//     for (let i = 0; i < PARTICLE_COUNT; i++) {
+//       // Start at center
+//       positions[i * 3] = 0;
+//       positions[i * 3 + 1] = 0;
+//       positions[i * 3 + 2] = 0;
+
+//       // Random outward explosion velocity
+//       const angle = Math.random() * Math.PI * 2;
+//       const speed = Math.random() * 4 + 2;
+
+//       velocities.push({
+//         x: Math.cos(angle) * speed,
+//         y: Math.sin(angle) * speed,
+//         z: (Math.random() - 0.5) * 2,
+//       });
+
+//       // Random target point on heart
+//       const t = Math.random() * Math.PI * 2;
+//       heartTargets.push(heartShape(t));
+
+//       // Random purple color
+//       const color = purpleShades[Math.floor(Math.random() * purpleShades.length)];
+//       colors[i * 3] = color.r;
+//       colors[i * 3 + 1] = color.g;
+//       colors[i * 3 + 2] = color.b;
+//     }
+
+//     velocitiesRef.current = velocities;
+//     heartTargetsRef.current = heartTargets;
+
+//     return { positions, colors };
+//   }, []);
+
+//   // Phase transitions
+//   useEffect(() => {
+//     const timer1 = setTimeout(() => (phaseRef.current = 1), 800);
+//     const timer2 = setTimeout(() => (phaseRef.current = 2), 1800);
+//     return () => {
+//       clearTimeout(timer1);
+//       clearTimeout(timer2);
+//     };
+//   }, []);
+
+//   useFrame(() => {
+//     if (!particlesRef.current) return;
+
+//     const geometry = particlesRef.current.geometry;
+//     const posArray = geometry.attributes.position.array;
+//     const velocities = velocitiesRef.current;
+//     const heartTargets = heartTargetsRef.current;
+//     const phase = phaseRef.current;
+
+//     for (let i = 0; i < PARTICLE_COUNT; i++) {
+//       const i3 = i * 3;
+
+//       const px = posArray[i3];
+//       const py = posArray[i3 + 1];
+//       const pz = posArray[i3 + 2];
+
+//       const vel = velocities[i];
+
+//       if (phase === 0) {
+//         // Explosion
+//         vel.x *= 0.99;
+//         vel.y *= 0.99;
+//       }
+
+//       if (phase === 1) {
+//         // Circular swirl
+//         const angle = 0.02;
+//         const cos = Math.cos(angle);
+//         const sin = Math.sin(angle);
+
+//         vel.x = vel.x * cos - vel.y * sin;
+//         vel.y = vel.x * sin + vel.y * cos;
+//       }
+
+//       if (phase === 2) {
+//         // Attract to heart
+//         const target = heartTargets[i];
+
+//         vel.x += (target.x - px) * 0.02;
+//         vel.y += (target.y - py) * 0.02;
+//         vel.z += (target.z - pz) * 0.02;
+
+//         vel.x *= 0.92;
+//         vel.y *= 0.92;
+//         vel.z *= 0.92;
+//       }
+
+//       posArray[i3] += vel.x;
+//       posArray[i3 + 1] += vel.y;
+//       posArray[i3 + 2] += vel.z;
+//     }
+
+//     geometry.attributes.position.needsUpdate = true;
+//   });
+
+//   // Cleanup on unmount
+//   useEffect(() => {
+//     return () => {
+//       if (particlesRef.current) {
+//         particlesRef.current.geometry.dispose();
+//         particlesRef.current.material.dispose();
+//       }
+//     };
+//   }, []);
+
+//   return (
+//     <points ref={particlesRef}>
+//       <bufferGeometry>
+//         <bufferAttribute
+//           attach="attributes-position"
+//           count={PARTICLE_COUNT}
+//           array={positions}
+//           itemSize={3}
+//         />
+//         <bufferAttribute
+//           attach="attributes-color"
+//           count={PARTICLE_COUNT}
+//           array={colors}
+//           itemSize={3}
+//         />
+//       </bufferGeometry>
+//       <pointsMaterial
+//         size={particleSize}
+//         vertexColors
+//         transparent
+//         opacity={0.9}
+//         sizeAttenuation
+//       />
+//     </points>
+//   );
+// }
+
+// Gift 3: Swipeable Coupons
+// function CouponsGift() {
+//   const [cards, setCards] = useState([
+//     { id: 1, title: "1x Movie Night", emoji: "🎬" },
+//     { id: 2, title: "1x Late Night Call (whatever time)", emoji: "📞" },
+//     { id: 3, title: "1x Priority Fly-to-Canada Visit (Valid when my bank account agrees)", emoji: "🛩️" },
+//     { id: 4, title: "1x Instant Dramatic Win card", emoji: "🙄" },
+//     { id: 5, title: "1x Full day to do anything you want", emoji: "🎉" },
+//     {id: 6, title: "1x Full Night to do whatever you want", emoji: "😈"}
+//   ]);
+
+//   const handleDragEnd = (event, info, cardId) => {
+//     if (Math.abs(info.offset.x) > 150) {
+//       setCards((prev) => prev.filter((card) => card.id !== cardId));
+//     }
+//   };
+
+//   return (
+//     <div className="flex flex-col items-center justify-center w-full">
+//       <motion.h3
+//         initial={{ y: -20, opacity: 0 }}
+//         animate={{ y: 0, opacity: 1 }}
+//         className="text-3xl md:text-4xl font-bold text-[#6D28D9] mb-8"
+//       >
+//         Kash-back Rewards 🎁
+//       </motion.h3>
+
+//       <div className="relative w-80 h-96">
+//         {cards.length === 0 ? (
+//           <motion.div
+//             initial={{ opacity: 0, scale: 0.8 }}
+//             animate={{ opacity: 1, scale: 1 }}
+//             className="text-center text-[#6D28D9] text-xl"
+//           >
+//             All claimed! 💜
+//           </motion.div>
+//         ) : (
+//           cards.map((card, index) => (
+//             <motion.div
+//               key={card.id}
+//               drag="x"
+//               dragConstraints={{ left: 0, right: 0 }}
+//               onDragEnd={(e, info) => handleDragEnd(e, info, card.id)}
+//               initial={{ scale: 0.95 - index * 0.05, y: index * -10 }}
+//               animate={{ scale: 1 - index * 0.05, y: index * -10 }}
+//               exit={{ x: 300, opacity: 0, rotate: 20 }}
+//               whileDrag={{ scale: 1.05, rotate: 5 }}
+//               className="absolute top-0 left-0 right-0 mx-auto w-full h-64 bg-gradient-to-br from-[#6D28D9] to-[#8B5CF6] rounded-2xl shadow-2xl p-8 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing"
+//               style={{ zIndex: cards.length - index }}
+//             >
+//               <span className="text-6xl mb-4">{card.emoji}</span>
+//               <h4 className="text-white text-2xl font-bold text-center">{card.title}</h4>
+//               <p className="text-purple-200 text-sm mt-4">Swipe to discard</p>
+//             </motion.div>
+//           ))
+//         )}
+//       </div>
+
+//       {cards.length > 0 && (
+//         <p className="text-[#6D28D9] text-lg mt-8">
+//           {cards.length} reward{cards.length !== 1 ? 's' : ''} remaining
+//         </p>
+//       )}
+//     </div>
+//   );
+// }
+
 function GlitterHeart() {
   const particlesRef = useRef();
-  const particleCount = 4000;
-  const animationPhase = useRef(0);
+  const PARTICLE_COUNT = 4000;
 
-  // Initialize particles
-  const { positions, colors, targetPositions, particleAngles, spawnDelays } = React.useMemo(() => {
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const targetPositions = new Float32Array(particleCount * 3);
-    const particleAngles = new Float32Array(particleCount);
-    const spawnDelays = new Float32Array(particleCount);
+  const lockedRef = useRef([]);
+  const velocitiesRef = useRef([]);
+  const startTimeRef = useRef(null);
 
-    const purpleShades = [
-      new THREE.Color("#9370DB"), // Medium Purple
-      new THREE.Color("#8A2BE2"), // Blue Violet
-      new THREE.Color("#DDA0DD"), // Plum
-      new THREE.Color("#DA70D6"),  // Orchid
-    ];
-
-    // Create array to store particles with their angles for sorting
-    const particles = [];
-
-    for (let i = 0; i < particleCount; i++) {
-      // Target heart positions using parametric equation
-      const t = Math.random() * Math.PI * 2;
-      const scale = 0.8;
-      const targetX = scale * 16 * Math.pow(Math.sin(t), 3);
-      const targetY = scale * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-      const targetZ = (Math.random() - 0.5) * 2;
-
-      // Calculate angle from center (clockwise from top, adjusted for clockwise motion)
-      // Use atan2 to get angle, then normalize to 0-2π and invert for clockwise
-      const angle = (Math.PI * 2 - Math.atan2(targetY, targetX) + Math.PI / 2) % (Math.PI * 2);
-
-      particles.push({
-        index: i,
-        targetX,
-        targetY,
-        targetZ,
-        angle,
-        color: purpleShades[Math.floor(Math.random() * purpleShades.length)]
-      });
+  // Calculate responsive particle size based on screen width
+  const getParticleSize = () => {
+    const width = window.innerWidth;
+    if (width < 640) {
+      // Mobile
+      return 0.3;
+    } else if (width < 1024) {
+      // Tablet
+      return 0.4;
+    } else {
+      // Desktop
+      return 0.5;
     }
+  };
 
-    // Sort particles by angle (clockwise)
-    particles.sort((a, b) => a.angle - b.angle);
+  const [particleSize, setParticleSize] = useState(getParticleSize());
 
-    // Assign sorted positions and calculate spawn delays
-    for (let i = 0; i < particleCount; i++) {
-      const particle = particles[i];
-      const i3 = particle.index * 3;
-
-      // All particles start at center (0, 0, 0)
-      positions[i3] = 0;
-      positions[i3 + 1] = 0;
-      positions[i3 + 2] = 0;
-
-      // Target positions
-      targetPositions[i3] = particle.targetX;
-      targetPositions[i3 + 1] = particle.targetY;
-      targetPositions[i3 + 2] = particle.targetZ;
-
-      // Store angle for spiral calculation
-      particleAngles[particle.index] = particle.angle;
-
-      // Stagger spawn delay based on clockwise order (0 to 1.5 seconds)
-      spawnDelays[particle.index] = (i / particleCount) * 1.5;
-
-      // Random purple color
-      colors[i3] = particle.color.r;
-      colors[i3 + 1] = particle.color.g;
-      colors[i3 + 2] = particle.color.b;
-    }
-
-    return { positions, colors, targetPositions, particleAngles, spawnDelays };
+  useEffect(() => {
+    const handleResize = () => {
+      setParticleSize(getParticleSize());
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // useFrame((state) => {
-  //   if (!particlesRef.current) return;
+  // Heart equation - scaled to fit on screen
+  function heartShape(t) {
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y =
+      13 * Math.cos(t) -
+      5 * Math.cos(2 * t) -
+      2 * Math.cos(3 * t) -
+      Math.cos(4 * t);
+    return new THREE.Vector2(x * 1.7, y * 1.7);
+  }
 
-  //   const time = state.clock.getElapsedTime();
-  //   const formationDuration = 2.5; // Total time for formation
+  const { positions, colors, heartTargets } = React.useMemo(() => {
+    const positions = new Float32Array(PARTICLE_COUNT * 3);
+    const colors = new Float32Array(PARTICLE_COUNT * 3);
+    const heartTargets = [];
+    const velocities = [];
+    const locked = [];
 
-  //   const positionAttribute = particlesRef.current.geometry.attributes.position;
-  //   const array = positionAttribute.array;
+    const purpleShades = [
+      new THREE.Color("#9370DB"), // Medium Purple - brighter
+      new THREE.Color("#8A2BE2"), // Blue Violet - brighter
+      new THREE.Color("#DDA0DD"), // Plum - brighter
+      new THREE.Color("#DA70D6"), // Orchid - brighter
+      new THREE.Color("#BA55D3"), // Medium Orchid - additional purple
+      new THREE.Color("#9B59B6"), // Amethyst - additional purple
+    ];
 
-  //   for (let i = 0; i < particleCount; i++) {
-  //     const i3 = i * 3;
-  //     const spawnDelay = spawnDelays[i];
-  //     const elapsed = time - spawnDelay;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      // Start at center (0, 0, 0)
+      positions[i * 3] = 0;
+      positions[i * 3 + 1] = 0;
+      positions[i * 3 + 2] = 0;
 
-  //     if (elapsed < 0) {
-  //       // Particle hasn't spawned yet - keep at center
-  //       array[i3] = 0;
-  //       array[i3 + 1] = 0;
-  //       array[i3 + 2] = 0;
-  //     } else {
-  //       // Calculate progress for this particle (0 to 1)
-  //       const progress = Math.min(elapsed / formationDuration, 1);
-        
-  //       // Create spiral path from center to target
-  //       // Use eased progress for smoother motion
-  //       const easedProgress = progress < 0.5 
-  //         ? 2 * progress * progress 
-  //         : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      // Give each particle random outward explosion velocity from center (slower for longer explosion)
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 1.5 + 0.5;
+      velocities.push({ 
+        x: Math.cos(angle) * speed, 
+        y: Math.sin(angle) * speed 
+      });
+      locked.push(false);
 
-  //       // Calculate spiral intermediate position
-  //       const targetX = targetPositions[i3];
-  //       const targetY = targetPositions[i3 + 1];
-  //       const targetZ = targetPositions[i3 + 2];
-        
-  //       // Distance from center to target
-  //       const distance = Math.sqrt(targetX * targetX + targetY * targetY);
-        
-  //       // Create spiral effect: particles follow a curved path
-  //       const spiralRadius = distance * easedProgress;
-  //       const angle = particleAngles[i];
-  //       const spiralAngle = angle + (1 - easedProgress) * Math.PI * 2; // Extra rotation for spiral
-        
-  //       // Spiral intermediate position
-  //       const spiralX = spiralRadius * Math.cos(spiralAngle);
-  //       const spiralY = spiralRadius * Math.sin(spiralAngle);
-        
-  //       // Lerp from spiral position to final target in the last 30% of progress
-  //       if (easedProgress > 0.7) {
-  //         const finalLerp = (easedProgress - 0.7) / 0.3;
-  //         array[i3] = spiralX + (targetX - spiralX) * finalLerp;
-  //         array[i3 + 1] = spiralY + (targetY - spiralY) * finalLerp;
-  //       } else {
-  //         array[i3] = spiralX;
-  //         array[i3 + 1] = spiralY;
-  //       }
-        
-  //       // Z position lerps directly
-  //       array[i3 + 2] = targetZ * easedProgress;
+      const t = Math.random() * Math.PI * 2;
+      heartTargets.push(heartShape(t));
 
-  //       // Add pulse effect once formed
-  //       if (progress > 0.9) {
-  //         const pulse = Math.sin(time * 2) * 0.1 + 1;
-  //         array[i3] *= pulse;
-  //         array[i3 + 1] *= pulse;
-  //       }
-  //     }
-  //   }
+      const color =
+        purpleShades[Math.floor(Math.random() * purpleShades.length)];
 
-  //   positionAttribute.needsUpdate = true;
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
 
-  //   // Rotate the heart
-  //   particlesRef.current.rotation.y = time * 0.2;
-  // });
+    velocitiesRef.current = velocities;
+    lockedRef.current = locked;
+
+    return { positions, colors, heartTargets };
+  }, []);
 
   useFrame((state) => {
     if (!particlesRef.current) return;
-  
-    const time = state.clock.getElapsedTime();
-    const formationDuration = 2.5; // Total time for formation
-  
-    const positionAttribute = particlesRef.current.geometry.attributes.position;
-    const array = positionAttribute.array;
-  
-    for (let i = 0; i < particleCount; i++) {
+
+    // Track start time
+    if (startTimeRef.current === null) {
+      startTimeRef.current = state.clock.getElapsedTime();
+    }
+
+    const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
+    const explosionPhaseDuration = 3.0; // Particles explode for 3 seconds before attraction starts
+
+    const geometry = particlesRef.current.geometry;
+    const pos = geometry.attributes.position.array;
+
+    const velocities = velocitiesRef.current;
+    const locked = lockedRef.current;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
       const i3 = i * 3;
-      const spawnDelay = spawnDelays[i];
-      const elapsed = time - spawnDelay;
-  
-      if (elapsed < 0) {
-        // Particle hasn't spawned yet - keep at center
-        array[i3] = 0;
-        array[i3 + 1] = 0;
-        array[i3 + 2] = 0;
-      } else {
-        // Calculate progress for this particle (0 to 1)
-        const progress = Math.min(elapsed / formationDuration, 1);
-        
-        // Eased progress for smoother motion
-        const easedProgress = progress < 0.5 
-          ? 2 * progress * progress 
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-  
-        const targetX = targetPositions[i3];
-        const targetY = targetPositions[i3 + 1];
-        const targetZ = targetPositions[i3 + 2];
-        
-        // Shoot straight from center to target (like bullets from barrel)
-        array[i3] = targetX * easedProgress;
-        array[i3 + 1] = targetY * easedProgress;
-        array[i3 + 2] = targetZ * easedProgress;
-  
-        // Add pulse effect once formed
-        if (progress > 0.9) {
-          const pulse = Math.sin(time * 2) * 0.1 + 1;
-          array[i3] *= pulse;
-          array[i3 + 1] *= pulse;
+
+      if (!locked[i]) {
+        const px = pos[i3];
+        const py = pos[i3 + 1];
+        const target = heartTargets[i];
+
+        // Calculate distance to target
+        const dx = target.x - px;
+        const dy = target.y - py;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Only start attracting after explosion phase
+        const shouldAttract = elapsed > explosionPhaseDuration;
+
+        // If close enough to target, lock it (smaller threshold so particles get closer)
+        if (distance < 3) {
+          pos[i3] = target.x;
+          pos[i3 + 1] = target.y;
+          velocities[i].x = 0;
+          velocities[i].y = 0;
+          locked[i] = true;
+        } else {
+          // During explosion phase, just move with velocity and damping
+          if (!shouldAttract) {
+            // Apply damping during explosion
+            velocities[i].x *= 0.99;
+            velocities[i].y *= 0.99;
+          } else {
+            // Apply attraction force toward target (weaker for longer formation time)
+            const attractionStrength = 0.02;
+            velocities[i].x += dx * attractionStrength;
+            velocities[i].y += dy * attractionStrength;
+
+            // Apply damping (less damping = slower deceleration = longer animation)
+            velocities[i].x *= 0.98;
+            velocities[i].y *= 0.98;
+          }
+
+          // Move particle
+          pos[i3] += velocities[i].x;
+          pos[i3 + 1] += velocities[i].y;
         }
       }
     }
-  
-    positionAttribute.needsUpdate = true;
-  
-    // Subtle left-right rotation instead of continuous 360
-    particlesRef.current.rotation.y = Math.sin(time * 0.3) * 0.2;
-  });
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (particlesRef.current) {
-        particlesRef.current.geometry.dispose();
-        particlesRef.current.material.dispose();
-      }
-    };
-  }, []);
+    geometry.attributes.position.needsUpdate = true;
+  });
 
   return (
     <points ref={particlesRef}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particleCount}
+          count={PARTICLE_COUNT}
           array={positions}
           itemSize={3}
         />
         <bufferAttribute
           attach="attributes-color"
-          count={particleCount}
+          count={PARTICLE_COUNT}
           array={colors}
           itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.15}
+        size={particleSize}
         vertexColors
         transparent
-        opacity={0.8}
+        opacity={1.0}
         sizeAttenuation
-        blending={THREE.AdditiveBlending}
+        depthWrite={false}
       />
     </points>
   );
 }
 
+
+// Gift 3: Swipeable Coupons
 // Gift 3: Swipeable Coupons
 function CouponsGift() {
-  const [cards, setCards] = useState([
+  const initialCards = [
     { id: 1, title: "1x Movie Night", emoji: "🎬" },
-    { id: 2, title: "1x Late Night Call", emoji: "📞" },
-    { id: 3, title: "1x Surprise Date", emoji: "🌟" },
-    { id: 4, title: "1x Home Cooked Meal", emoji: "🍳" },
-    { id: 5, title: "1x Spa Day Together", emoji: "💆" },
-  ]);
+    { id: 2, title: "1x Late Night Call (whatever time)", emoji: "📞" },
+    { id: 3, title: "1x Priority Fly-to-Canada Visit (Valid when my bank account agrees)", emoji: "🛩️" },
+    { id: 4, title: "1x Instant Dramatic Win card", emoji: "🙄" },
+    { id: 5, title: "1x Full day to do anything you want", emoji: "🎉" },
+    { id: 6, title: "1x Full Night to do whatever you want, no complaints", emoji: "😈😘"}
+  ];
+
+  const [cards, setCards] = useState(initialCards);
 
   const handleDragEnd = (event, info, cardId) => {
     if (Math.abs(info.offset.x) > 150) {
@@ -893,7 +1269,8 @@ function CouponsGift() {
             All claimed! 💜
           </motion.div>
         ) : (
-          cards.map((card, index) => (
+          <AnimatePresence initial={false}>
+            {cards.map((card, index) => (
             <motion.div
               key={card.id}
               drag="x"
@@ -910,7 +1287,8 @@ function CouponsGift() {
               <h4 className="text-white text-2xl font-bold text-center">{card.title}</h4>
               <p className="text-purple-200 text-sm mt-4">Swipe to discard</p>
             </motion.div>
-          ))
+            ))}
+          </AnimatePresence>
         )}
       </div>
 
